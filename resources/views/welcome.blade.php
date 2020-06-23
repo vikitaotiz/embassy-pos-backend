@@ -81,7 +81,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    POS Backend
+                    Embassy POS Backend
                 </div>
 
                 <div class="links">
