@@ -170,4 +170,60 @@ class SaleController extends Controller
 
         return SaleResource::collection($sales);
     }
+
+    public function salesLastSevenDays(){
+
+
+
+        $today_sales = Sale::whereDate( 'created_at', Carbon::now()->toDateString())->get();
+
+        $yesterday_sales = Sale::whereDate( 'created_at', Carbon::now()->subDays(1)->toDateString())
+           ->get();
+
+        $twoDaysAgo_sales = Sale::whereDate( 'created_at', Carbon::now()->subDays(2)->toDateString())
+           ->get();
+
+        $threeDaysAgo_sales = Sale::whereDate( 'created_at', Carbon::now()->subDays(3)->toDateString())
+           ->get();
+
+        $fourDaysAgo_sales = Sale::whereDate( 'created_at', Carbon::now()->subDays(4)->toDateString())
+           ->get();
+
+        $fiveDaysAgo_sales = Sale::whereDate( 'created_at', Carbon::now()->subDays(5)->toDateString())
+           ->get();
+
+        $sixDaysAgo_sales = Sale::whereDate( 'created_at', Carbon::now()->subDays(6)->toDateString())
+           ->get();
+
+        $sales = array(
+            $today_sales->count(),
+            $yesterday_sales->count(),
+            $twoDaysAgo_sales->count(),
+            $threeDaysAgo_sales->count(),
+            $fourDaysAgo_sales->count(),
+            $fiveDaysAgo_sales->count(),
+            $sixDaysAgo_sales->count()
+        );
+
+
+        // $today_sales = Carbon::now()->toDateString();
+        // $yesterday_sales = Carbon::now()->subDays(1)->toDateString();
+        // $twoDaysAgo_sales = Carbon::now()->subDays(2)->toDateString();
+        // $threeDaysAgo_sales = Carbon::now()->subDays(3)->toDateString();
+        // $fourDaysAgo_sales = Carbon::now()->subDays(4)->toDateString();
+        // $fiveDaysAgo_sales = Carbon::now()->subDays(5)->toDateString();
+        // $sixDaysAgo_sales = Carbon::now()->subDays(6)->toDateString();
+
+        // $sales = array(
+        //     $today_sales,
+        //     $yesterday_sales,
+        //     $twoDaysAgo_sales,
+        //     $threeDaysAgo_sales,
+        //     $fourDaysAgo_sales,
+        //     $fiveDaysAgo_sales,
+        //     $sixDaysAgo_sales
+        // );
+
+        return $sales;
+    }
 }
