@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Sale;
+use App\Duplicatesale;
 use App\Http\Resources\Sales\SaleResource;
 use App\Http\Requests\Sales\CreateSale;
 use App\Http\Requests\Sales\UpdateSale;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class SaleController extends Controller
 {
@@ -24,18 +26,33 @@ class SaleController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    // public function store(CreateSale $request)
     public function store(CreateSale $request)
     {
-        $sale = Sale::create([
-            'content' => $request->content,
-            'payment_mode' => $request->payment_mode,
-            'amount' => $request->amount,
-            'sold' => $request->sold,
-            'user_id' => auth()->user()->id
-        ]);
+        $duplicate_data = DB::table('sales')->where('amount', $request->amount)->get();
 
-        return new SaleResource($sale);
+        if($duplicate_data->count() > 1){
 
+            $sale = Duplicatesale::create([
+                'content' => $request->content,
+                'payment_mode' => $request->payment_mode,
+                'amount' => $request->amount,
+                'sold' => $request->sold,
+                'user_id' => auth()->user()->id
+            ]);
+
+        } else {
+
+            $sale = Sale::create([
+                'content' => $request->content,
+                'payment_mode' => $request->payment_mode,
+                'amount' => $request->amount,
+                'sold' => $request->sold,
+                'user_id' => auth()->user()->id
+            ]);
+
+            return new SaleResource($sale);
+        }
     }
 
     /**
@@ -88,20 +105,69 @@ class SaleController extends Controller
     }
 
     public function cashSalesIn24hrs(){
-        $sales = Sale::where('payment_mode', '=', 'cash')
-                     ->where('created_at', '>=', Carbon::now()->subDay())->get();
+        $from = Carbon::now()->startOfDay()->toDateTimeString();
+        $to = Carbon::now()->endOfDay()->toDateTimeString();
+
+        $sales = Sale::whereBetween('created_at', [$from, $to])
+                    ->where('payment_mode', '=', 'cash')
+                    ->get();
+
         return SaleResource::collection($sales);
     }
 
     public function mpesaSalesIn24hrs(){
-        $sales = Sale::where('payment_mode', '=', 'mpesa')
-                     ->where('created_at', '>=', Carbon::now()->subDay())->get();
+        $from = Carbon::now()->startOfDay()->toDateTimeString();
+        $to = Carbon::now()->endOfDay()->toDateTimeString();
+
+        $sales = Sale::whereBetween('created_at', [$from, $to])
+                    ->where('payment_mode', '=', 'mpesa')
+                    ->get();
+
         return SaleResource::collection($sales);
     }
 
     public function cardSalesIn24hrs(){
-        $sales = Sale::where('payment_mode', '=', 'card')
-                     ->where('created_at', '>=', Carbon::now()->subDay())->get();
+        $from = Carbon::now()->startOfDay()->toDateTimeString();
+        $to = Carbon::now()->endOfDay()->toDateTimeString();
+
+        $sales = Sale::whereBetween('created_at', [$from, $to])
+                    ->where('payment_mode', '=', 'card')
+                    ->get();
+
+        return SaleResource::collection($sales);
+    }
+
+    public function salesReport(Request $request){
+
+        if($request->payment_mode){
+
+            $sales = Sale::whereBetween(DB::raw('DATE(created_at)'),
+                array($request->from, $request->to))
+                ->where('payment_mode', $request->payment_mode)
+                ->get();
+
+        } elseif($request->user_id){
+
+            $sales = Sale::whereBetween(DB::raw('DATE(created_at)'),
+                array($request->from, $request->to))
+                ->where('user_id', $request->user_id)
+                ->get();
+
+        } else {
+            $sales = Sale::whereBetween(DB::raw('DATE(created_at)'),
+                    array($request->from, $request->to))->get();
+        }
+
+        return SaleResource::collection($sales);
+    }
+
+    public function salesReportAll(Request $request){
+        $sales = Sale::whereBetween(DB::raw('DATE(created_at)'),
+            array($request->from, $request->to))
+            ->where('payment_mode', $request->payment_mode)
+            ->where('user_id', $request->user_id)
+            ->get();
+
         return SaleResource::collection($sales);
     }
 }
