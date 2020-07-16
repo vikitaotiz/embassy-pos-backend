@@ -137,6 +137,17 @@ class SaleController extends Controller
         return SaleResource::collection($sales);
     }
 
+    public function creditSalesIn24hrs(){
+        $from = Carbon::now()->startOfDay()->toDateTimeString();
+        $to = Carbon::now()->endOfDay()->toDateTimeString();
+
+        $sales = Sale::whereBetween('created_at', [$from, $to])
+                    ->where('payment_mode', '=', 'credit')
+                    ->get();
+
+        return SaleResource::collection($sales);
+    }
+
     public function salesReport(Request $request){
 
         if($request->payment_mode){
