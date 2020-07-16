@@ -57,6 +57,7 @@ Route::get('/mpesaSalesIn24hrs', 'SaleController@mpesaSalesIn24hrs')->middleware
 Route::get('/cardSalesIn24hrs', 'SaleController@cardSalesIn24hrs')->middleware('auth:api');
 Route::get('/creditSalesIn24hrs', 'SaleController@creditSalesIn24hrs')->middleware('auth:api');
 Route::post('/sales_report', 'SaleController@salesReport')->middleware('auth:api');
+Route::get('/all_sales_in_24hrs', 'SaleController@allSalesIn24hrs')->middleware('auth:api');
 Route::post('/sales_report_all', 'SaleController@salesReportAll')->middleware('auth:api');
 Route::get('/sales_last_seven_days', 'SaleController@salesLastSevenDays')->middleware('auth:api');
 
